@@ -7,7 +7,6 @@ def show_current_stock(shop):
     Gets total quantity of all products in the shop
     :param shop: Store class, loaded with products from Product class
     """
-    print()
     print(shop.get_total_quantity())
     print("----------")
 
@@ -66,7 +65,7 @@ def start(shop):
 4. Quit""")
         if not shop.get_all_products():
             print("\nThe shop does not have any products left. Thank you for"
-                  "your purchase and have a nice day!")
+                  " your purchase and have a nice day!")
             exit()
         menu_choice = user_input.main_menu_input()
         if menu_choice == 4:
@@ -78,9 +77,12 @@ def start(shop):
 def main():
     """Created a list of product objects and starts the menu interface, handles exceptions"""
     try:
-        product_list = [ products.Product("MacBook Air M2", price=1450, quantity=100),
-                    products.Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-                    products.Product("Google Pixel 7", price=500, quantity=250)
+        # setup initial stock of inventory
+        product_list = [products.Product("MacBook Air M2", price=1450, quantity=100),
+                        products.Product("Bose QuietComfort Earbuds", price=250, quantity=500),
+                        products.Product("Google Pixel 7", price=500, quantity=250),
+                        products.NonStockedProduct("Windows License", price=125),
+                        products.LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
                         ]
         best_buy = store.Store(product_list)
     except ValueError as error:
