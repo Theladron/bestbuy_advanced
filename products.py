@@ -33,8 +33,10 @@ class Product:
         self.name = name
         self.price = float(price)
         self._quantity = quantity
-        self._active = True
-
+        if self._quantity > 0:
+            self._active = True
+        else:
+            self._active = False
 
     def get_quantity(self):
         """
