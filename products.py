@@ -1,3 +1,5 @@
+import promotions
+
 class Product:
     """
     Represents a product in a store.
@@ -32,8 +34,10 @@ class Product:
             raise ValueError("Price/Quantity cannot be negative")
         self.name = name
         self.price = float(price)
+        self.promotion = []
         self.activate()
         self.set_quantity(quantity)
+
 
 
     def get_quantity(self):
@@ -78,7 +82,14 @@ class Product:
         :return: name, price, quantity as str
         """
         if self._active:
-            return f"{self.name}, Price: {self.price}, Quantity: {self._quantity}"
+            show_product = (f"{self.name}, Price: "
+                            f"{self.price}, Quantity: {self._quantity}, Promotion(s): ")
+            if self.promotion:
+                for promotion in self.get_promotion():
+                    show_product += f"{promotion.name} "
+            else:
+                show_product += "None"
+            return show_product
 
 
     def buy(self, quantity):
@@ -95,9 +106,20 @@ class Product:
         if (self.get_quantity() - quantity) < 0:
             raise ValueError("Quantity larger then what exists")
         self.set_quantity((self.get_quantity() - quantity))
+        # to make sense logically, we have to apply the discounts in a specific order
+        if promotions.ThirdOneFree in self.get_promotion():
+            quantity = promotions.ThirdOneFree.apply_promotion(self.name, quantity)
+        if promotions.PercentDiscount in self.get_promotion():
+            quantity = promotions.PercentDiscount.apply_promotion(self.name, quantity)
+        if promotions.SecondHalfPrice in self.get_promotion():
+            quantity = promotions.SecondHalfPrice.apply_promotion(self.name, quantity)
         return self.price * quantity
 
+    def get_promotion(self):
+        return self.promotion
 
+    def set_promotion(self, promotion):
+        self.promotion.append(promotion)
 
 class NonStockedProduct(Product):
 
@@ -116,8 +138,14 @@ class NonStockedProduct(Product):
         Shows the name, price and quantity of the product
         :return: name, price, quantity as str
         """
-        if self._active:
-            return f"{self.name}, Price: {self.price}, Quantity: Unlimited"
+        show_product = (f"{self.name}, Price: "
+                        f"{self.price}, Quantity: Unlimited, Promotion(s): ")
+        if self.promotion:
+            for promotion in self.get_promotion():
+                show_product += f"{promotion.name} "
+        else:
+            show_product += "None"
+        return show_product
 
 
 class LimitedProduct(Product):
@@ -129,7 +157,14 @@ class LimitedProduct(Product):
 
     def show(self):
         if self._active:
-            return f"{self.name}, Price: {self.price}, Limited to 1 per order!"
+            show_product = (f"{self.name}, Price: {self.price},"
+                            f" Quantity: {self._quantity}, Limited to 1 per order!, Promotion(s): ")
+            if self.promotion:
+                for promotion in self.get_promotion():
+                    show_product += f"{promotion.name} "
+            else:
+                show_product += "None"
+            return show_product
 
 
     def buy(self, quantity):
@@ -138,4 +173,7 @@ class LimitedProduct(Product):
         if quantity != 1:
             raise ValueError("Only 1 is allowed for this product!")
         self.set_quantity((self.get_quantity() - quantity))
+        # Since we can only buy 1 product at a time, only 1 discount makes sence
+        if promotions.PercentDiscount in self.get_promotion():
+            quantity = promotions.PercentDiscount.apply_promotion(self.name, quantity)
         return self.price * quantity
