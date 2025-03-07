@@ -87,7 +87,7 @@ class Store:
                 if not product.is_active():
                     self.remove_product(product)
             except ValueError as error:
-                return (f"Error while making order: {error}.\n"
+                return (f"Error while making order: {error}\n"
                         f"Total order price before the error occurred: {total_price}")
 
         return f"Total order price: {total_price}"
