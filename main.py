@@ -21,7 +21,7 @@ def show_products(shop):
     print("----------")
     product_list = shop.get_all_products()
     for index, product in enumerate(product_list):
-        print(f"{index+1}. {product.show()}")
+        print(f"{index+1}. {product}")
     print("----------")
 
 
@@ -77,7 +77,10 @@ def start(shop):
 
 
 def main():
-    """Created a list of product objects and starts the menu interface, handles exceptions"""
+    """
+    Creates a list of product instances, adds promotions
+    and starts the menu interface, handles exceptions
+    """
     try:
         # setup initial stock of inventory
         product_list = [products.Product("MacBook Air M2", price=1450, quantity=100),
@@ -93,11 +96,12 @@ def main():
         thirty_percent = promotions.PercentDiscount("30% off!", percent=30)
 
         # Add promotions to products
-        product_list[0].set_promotion(second_half_price)
-        product_list[0].set_promotion(third_one_free)
-        product_list[1].set_promotion(third_one_free)
-        product_list[3].set_promotion(thirty_percent)
+        product_list[0].promotion = second_half_price
+        product_list[0].promotion = third_one_free
+        product_list[1].promotion = third_one_free
+        product_list[3].promotion = thirty_percent
         best_buy = store.Store(product_list)
+
     except ValueError as error:
         print(f"Error with the input values: {error}")
     except TypeError as error:

@@ -1,14 +1,16 @@
 import promotions
 
+
 class Product:
     """
-    Represents a product in a store.
+    Represents a product in a store
 
     Attributes:
         name (str): The name of the product
-        price (float): The price of the product
+        _price (float): The price of the product
         _quantity (int): The available quantity of the product
         _active (bool): The status of the product, indicates whether the product is active
+        promotion (list): List of Promotion class instances
     """
 
 
@@ -36,26 +38,71 @@ class Product:
         self.price = float(price)
         self.promotion = []
         self.activate()
-        self.set_quantity(quantity)
+        self.quantity = quantity
 
 
-
-    def get_quantity(self):
+    @property
+    def quantity(self):
         """
-        Gets the current quantity of the product
+        Getter function. Gets the current quantity of the product
         :return: quantity as int
         """
         return self._quantity
 
 
-    def set_quantity(self, quantity):
+    @quantity.setter
+    def quantity(self, quantity):
         """
-        Updates the quantity of the product
+        Setter function. Updates the quantity of the product
         :param quantity: quantity as int
+        Raises:
+            ValueError: if quantity is negative
         """
         self._quantity = quantity
+        if self._quantity < 0:
+            raise ValueError("Quantity cannot be negative")
         if self._quantity == 0:
             self.deactivate()
+
+
+    @property
+    def price(self):
+        """
+        Getter function. Gets the current price of the product
+        :return: price as int
+        """
+        return self._price
+
+
+    @price.setter
+    def price(self, price):
+        """
+        Setter function. Updates the price of the product
+        :param price: price as int
+        Raises:
+            ValueError: if price is negative
+        """
+        self._price = price
+        if self._price < 0:
+            raise ValueError("Price cannot be negative")
+
+
+    def __lt__(self, other):
+        """
+        Magic method. Compares if the price of one Product instance is lower than the other
+        :param other: second Product instance
+        :return: True if price of first Product instance is lower than the other, else false
+        """
+        return self.price < other.price
+
+
+    def __gt__(self, other):
+        """
+        Magic method. Compares if the price of one Product instance is greater than the other
+        :param other: second Product instance
+        :return: True if price of first Product instance is greater than the other, else false
+        """
+        return self.price > other.price
 
 
     def is_active(self):
@@ -76,16 +123,16 @@ class Product:
         self._active = False
 
 
-    def show(self):
+    def __str__(self):
         """
-        Shows the name, price and quantity of the product
-        :return: name, price, quantity as str
+        Magic method. Shows the name, price quantity and promotions of the product
+        :return: name, price, quantity, promotions as str
         """
         if self._active:
             show_product = (f"{self.name}, Price: "
-                            f"{self.price}, Quantity: {self._quantity}, Promotion(s): ")
+                            f"{self.price}, Quantity: {self.quantity}, Promotion(s): ")
             if self.promotion:
-                for promotion in self.get_promotion():
+                for promotion in self.promotion:
                     show_product += f"{promotion.name} "
             else:
                 show_product += "None"
@@ -94,7 +141,8 @@ class Product:
 
     def buy(self, quantity):
         """
-        Buys a given amount of the product, raises exceptions
+        Buys a given amount of the product, updates quantity depending on
+        active promotions, raises exceptions
         :param quantity: quantity that should be bought as int
         :return: total price of the purchase as float
 
@@ -103,64 +151,102 @@ class Product:
         """
         if not self.is_active():
             raise ValueError("Product Inactive")
-        if (self.get_quantity() - quantity) < 0:
-            raise ValueError("Quantity larger then what exists")
-        self.set_quantity((self.get_quantity() - quantity))
+        self.quantity -= quantity
         # to make sense logically, we have to apply the discounts in a specific order
-        if promotions.ThirdOneFree in self.get_promotion():
+        if promotions.ThirdOneFree in self.promotion:
             quantity = promotions.ThirdOneFree.apply_promotion(self.name, quantity)
-        if promotions.PercentDiscount in self.get_promotion():
+        if promotions.PercentDiscount in self.promotion:
             quantity = promotions.PercentDiscount.apply_promotion(self.name, quantity)
-        if promotions.SecondHalfPrice in self.get_promotion():
+        if promotions.SecondHalfPrice in self.promotion:
             quantity = promotions.SecondHalfPrice.apply_promotion(self.name, quantity)
         return self.price * quantity
 
-    def get_promotion(self):
-        return self.promotion
 
-    def set_promotion(self, promotion):
-        self.promotion.append(promotion)
+    @property
+    def promotion(self):
+        """
+        Getter function. gets the promotion list
+        :return: promotions as list
+        """
+        return self._promotion
+
+    @promotion.setter
+    def promotion(self, promotion):
+        """
+        Setter function. Sets promotion to an empty list if empty, else appends
+        a Promotion instance to the list
+        :param promotion: Promotion instance
+        """
+        if not promotion:
+            self._promotion = promotion
+        else:
+            self._promotion.append(promotion)
+
 
 class NonStockedProduct(Product):
+    """
+    Children of Product class instance. Represents a Product instance
+    that has unlimited quantity
+    """
 
 
     def __init__(self, name, price):
+        """Calls initialization from parent class, then activates to always stay active"""
         super().__init__(name, price, 0)
         self.activate()
 
 
-    def buy(self, quantity):
-        return self.price * quantity
-
-
-    def show(self):
+    def __str__(self):
         """
-        Shows the name, price and quantity of the product
-        :return: name, price, quantity as str
+        Shows the name, price, quantity and promotions of the product
+        :return: name, price, quantity and promotions as str
         """
         show_product = (f"{self.name}, Price: "
                         f"{self.price}, Quantity: Unlimited, Promotion(s): ")
         if self.promotion:
-            for promotion in self.get_promotion():
+            for promotion in self.promotion:
                 show_product += f"{promotion.name} "
         else:
             show_product += "None"
         return show_product
 
 
+    def buy(self, quantity):
+        """
+        gets amount the order was bought for by multiplying price with quantity
+        :param quantity: amount of items bought as int
+        :return: overall price as float
+        """
+        return self.price * quantity
+
+
 class LimitedProduct(Product):
+    """
+    Children of Product class instance. Represents a Product instance
+    that can only be bought in quantities of one
+
+    Additional Attributes:
+        maximum (int): maximum number of items that can be bought at a time
+    """
+
 
     def __init__(self, name, price, quantity, maximum):
+        """Calls initialization from parent class, then adds a maximum"""
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
 
-    def show(self):
+    def __str__(self):
+        """
+        Shows the name, price, quantity, maximum and promotion of the product
+        :return: name, price, quantity, maximum and promotion as str
+        """
         if self._active:
             show_product = (f"{self.name}, Price: {self.price},"
-                            f" Quantity: {self._quantity}, Limited to 1 per order!, Promotion(s): ")
+                            f" Quantity: {self._quantity}, Limited to {self.maximum} "
+                            f"per order!, Promotion(s): ")
             if self.promotion:
-                for promotion in self.get_promotion():
+                for promotion in self.promotion:
                     show_product += f"{promotion.name} "
             else:
                 show_product += "None"
@@ -168,12 +254,21 @@ class LimitedProduct(Product):
 
 
     def buy(self, quantity):
+        """
+        Buys a given amount of the product, updates quantity depending on
+        active promotion, raises exceptions
+        :param quantity: quantity that should be bought as int
+        :return: total price of the purchase as float
+
+        Raises:
+            ValueError: if product is inactive or more than 1 product is bought
+        """
         if not self.is_active():
             raise ValueError("Product Inactive")
         if quantity != 1:
             raise ValueError("Only 1 is allowed for this product!")
-        self.set_quantity((self.get_quantity() - quantity))
-        # Since we can only buy 1 product at a time, only 1 discount makes sence
-        if promotions.PercentDiscount in self.get_promotion():
+        self.quantity -= quantity
+        # Since we can only buy 1 product at a time, only 1 discount makes sense
+        if promotions.PercentDiscount in self.promotion:
             quantity = promotions.PercentDiscount.apply_promotion(self.name, quantity)
-        return self.price * quantity
+        return self._price * quantity
