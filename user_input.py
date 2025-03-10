@@ -27,7 +27,7 @@ def order_item_input(product_list):
         if not item_input:
             return item_input
         elif (item_input.isnumeric()
-            and 1 <= int(item_input) <= len(product_list)):
+              and 1 <= int(item_input) <= len(product_list)):
             return int(item_input)
         else:
             print("Error. Please enter a valid product number or leave the input blank.")

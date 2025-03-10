@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from decimal import Decimal, ROUND_HALF_UP
 
 
 class Promotion(ABC):
@@ -9,14 +10,12 @@ class Promotion(ABC):
         name (str): name of the promotion
         """
 
-
     def __init__(self, name):
         """
         Initializes the Promotion instance with its name
         :param name: promotion name as str
         """
         self.name = name
-
 
     @abstractmethod
     def apply_promotion(self, product, quantity):
@@ -29,13 +28,11 @@ class Promotion(ABC):
         raise NotImplementedError("Only children have promotions")
 
 
-
 class SecondHalfPrice(Promotion):
     """
     Children of Promotion instance. Halves the price of
     every second bought Product instance by adjusting the quantity of the purchase
     """
-
 
     def apply_promotion(self, product, quantity):
         """
@@ -45,7 +42,9 @@ class SecondHalfPrice(Promotion):
         :param quantity: amount of bought items as int
         :return: updated quantity as int
         """
-        full_price_quantity = quantity // 2
+        full_price_quantity = quantity / 2
+        full_price_decimal = Decimal(f"{full_price_quantity}")
+        full_price_quantity = int(full_price_decimal.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
         half_price_quantity = quantity - full_price_quantity
         return full_price_quantity + half_price_quantity * 0.5
 
@@ -55,7 +54,6 @@ class ThirdOneFree(Promotion):
     Children of Promotion instance. Makes every third purchased Product instance
     free by adjusting the quantity of the purchase
     """
-
 
     def apply_promotion(self, product, quantity):
         """
@@ -75,7 +73,6 @@ class PercentDiscount(Promotion):
     by adjusting the quantity
     """
 
-
     def __init__(self, name, percent):
         """
         Calls for initialization in the parent class, creates a discount afterward
@@ -84,7 +81,6 @@ class PercentDiscount(Promotion):
         """
         super().__init__(name)
         self.discount = (100 - percent) / 100
-
 
     def apply_promotion(self, product, quantity):
         """

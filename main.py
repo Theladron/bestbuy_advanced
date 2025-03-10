@@ -1,7 +1,7 @@
-import store
 import products
-import user_input
 import promotions
+import store
+import user_input
 
 
 def show_current_stock(shop):
@@ -21,7 +21,7 @@ def show_products(shop):
     print("----------")
     product_list = shop.get_all_products()
     for index, product in enumerate(product_list):
-        print(f"{index+1}. {product}")
+        print(f"{index + 1}. {product}")
     print("----------")
 
 
@@ -39,7 +39,7 @@ def make_order(shop):
         item = user_input.order_item_input(product_list)
         quantity = user_input.order_quantity_input()
         if isinstance(item and quantity, int):
-            order_list.append((product_list[item-1], quantity))
+            order_list.append((product_list[item - 1], quantity))
         else:
             break
     if order_list:
@@ -99,7 +99,8 @@ def main():
         product_list[0].promotion = second_half_price
         product_list[0].promotion = third_one_free
         product_list[1].promotion = third_one_free
-        product_list[3].promotion = thirty_percent
+        product_list[4].promotion = thirty_percent
+        product_list[0].promotion = thirty_percent
         best_buy = store.Store(product_list)
 
     except ValueError as error:

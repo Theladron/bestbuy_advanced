@@ -16,7 +16,6 @@ class Store:
             for product in product_list:
                 self.add_product(product)
 
-
     def __add__(self, other):
         """
         Magic method. Combines two Store instances into one by adding them together
@@ -26,7 +25,6 @@ class Store:
         combined_products = self.get_all_products() + other.get_all_products()
         return Store(combined_products)
 
-
     def add_product(self, product):
         """
         Adds a product to the list
@@ -34,14 +32,12 @@ class Store:
         """
         self._products.append(product)
 
-
     def remove_product(self, product):
         """
         Removes a product from the list
         :param product: instance of a Product class
         """
         self._products.remove(product)
-
 
     def get_total_quantity(self):
         """
@@ -52,7 +48,6 @@ class Store:
         for product in self._products:
             total_products += product.quantity
         return f"Total of {total_products} items in store"
-
 
     def __contains__(self, item):
         """
@@ -65,14 +60,16 @@ class Store:
                 return True
         return False
 
-
     def get_all_products(self):
         """
         Gets all products in the store
         :return: products in the store as list
         """
-        return self._products
-
+        active_products = []
+        for product in self._products:
+            if product.is_active():
+                active_products.append(product)
+        return active_products
 
     def order(self, shopping_list):
         """
@@ -84,10 +81,8 @@ class Store:
         for product, quantity in shopping_list:
             try:
                 total_price += product.buy(quantity)
-                if not product.is_active():
-                    self.remove_product(product)
             except ValueError as error:
                 return (f"Error while making order: {error}\n"
-                        f"Total order price before the error occurred: {total_price}")
+                        f"Total order price before the error occurred: {round(total_price, 2)}")
 
-        return f"Total order price: {total_price}"
+        return f"Total order price: {round(total_price, 2)}"
