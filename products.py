@@ -22,9 +22,11 @@ class Product:
 
         Raises:
             NameError: if name is empty
-            TypeError: if price is not int/float or quantity is not int
+            TypeError: if price is not int/float, quantity is not int or name is not str
             ValueError: if price or quantity is negative
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Name has to be a string: {name}")
         if not name:
             raise NameError("Name cannot be empty")
         if not isinstance(price, (float, int)):
