@@ -71,7 +71,8 @@ class Store:
                 active_products.append(product)
         return active_products
 
-    def order(self, shopping_list):
+    @staticmethod
+    def order(shopping_list):
         """
         Processes the orders from the customers, handles exceptions
         :param shopping_list: product/quantity tuples as list

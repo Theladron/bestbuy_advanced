@@ -142,19 +142,7 @@ class Product:
         if self.quantity - quantity < 0:
             raise ValueError("Quantity cannot be negative")
         self.quantity -= quantity
-        # to make sense logically, we have to apply the discounts in a specific order
-        promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.ThirdOneFree)), None)
-        if promo:
-            quantity = promo.apply_promotion(self.name, quantity)
-        promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.PercentDiscount)), None)
-        if promo:
-            quantity = promo.apply_promotion(self.name, quantity)
-        promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.SecondHalfPrice)), None)
-        if promo:
-            quantity = promo.apply_promotion(self.name, quantity)
+        quantity = self.get_promotions(quantity)
         return self.price * quantity
 
     @property
@@ -176,6 +164,23 @@ class Product:
             self._promotion = promotion
         else:
             self._promotion.append(promotion)
+
+    def get_promotions(self, quantity):
+
+        # to make sense logically, we have to apply the discounts in a specific order
+        promo = next((promotion for promotion in self.promotion
+                      if isinstance(promotion, promotions.ThirdOneFree)), None)
+        if promo:
+            quantity = promo.apply_promotion(self.name, quantity)
+        promo = next((promotion for promotion in self.promotion
+                      if isinstance(promotion, promotions.PercentDiscount)), None)
+        if promo:
+            quantity = promo.apply_promotion(self.name, quantity)
+        promo = next((promotion for promotion in self.promotion
+                      if isinstance(promotion, promotions.SecondHalfPrice)), None)
+        if promo:
+            quantity = promo.apply_promotion(self.name, quantity)
+        return quantity
 
 
 class NonStockedProduct(Product):
@@ -209,18 +214,7 @@ class NonStockedProduct(Product):
         :param quantity: amount of items bought as int
         :return: overall price as float
         """
-        promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.ThirdOneFree)), None)
-        if promo:
-            quantity = promo.apply_promotion(self.name, quantity)
-        promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.PercentDiscount)), None)
-        if promo:
-            quantity = promo.apply_promotion(self.name, quantity)
-        promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.SecondHalfPrice)), None)
-        if promo:
-            quantity = promo.apply_promotion(self.name, quantity)
+        quantity = self.get_promotions(quantity)
         return self.price * quantity
 
 
@@ -262,16 +256,14 @@ class LimitedProduct(Product):
         :return: total price of the purchase as float
 
         Raises:
-            ValueError: if product is inactive or more than 1 product is bought
+            ValueError: if product is inactive, more than maximum or too high quantity is bought
         """
         if not self.is_active():
             raise ValueError("Product Inactive")
-        if quantity != 1:
-            raise ValueError("Only 1 is allowed for this product!")
+        if quantity > self.maximum:
+            raise ValueError(f"Only {self.maximum} is allowed for this product!")
+        if self.quantity - quantity < 0:
+            raise ValueError("Quantity cannot be negative")
         self.quantity -= quantity
-        # Since we can only buy 1 product at a time, only 1 discount makes sense
-        promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.PercentDiscount)), None)
-        if promo:
-            quantity = promo.apply_promotion(self.name, quantity)
+        quantity = self.get_promotions(quantity)
         return self._price * quantity
