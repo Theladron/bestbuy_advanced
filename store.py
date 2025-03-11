@@ -79,11 +79,14 @@ class Store:
         :return: total price as float, else error message
         """
         total_price = 0
+        original_quantity = []
         for product, quantity in shopping_list:
             try:
+                original_quantity.append(product.quantity)
                 total_price += product.buy(quantity)
             except ValueError as error:
-                return (f"Error while making order: {error}\n"
-                        f"Total order price before the error occurred: {round(total_price, 2)}")
+                for index, refund_quantity in enumerate(original_quantity[:-1]):
+                    shopping_list[index][0].quantity = refund_quantity
+                return (f"Error while making order: {error}")
 
         return f"Total order price: {round(total_price, 2)}"
