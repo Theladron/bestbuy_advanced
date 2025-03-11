@@ -166,7 +166,11 @@ class Product:
             self._promotion.append(promotion)
 
     def get_promotions(self, quantity):
-
+        """
+        Applies promotions in the logical order depending on active promotions
+        :param quantity: quantity of the purchase as int
+        :return: Updated quantity after applying promotions as float
+        """
         # to make sense logically, we have to apply the discounts in a specific order
         promo = next((promotion for promotion in self.promotion
                       if isinstance(promotion, promotions.ThirdOneFree)), None)
