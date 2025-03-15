@@ -101,6 +101,7 @@ def main():
         product_list[1].promotion = third_one_free
         product_list[4].promotion = thirty_percent
         product_list[0].promotion = thirty_percent
+        product_list[0].promotion = third_one_free
         best_buy = store.Store(product_list)
 
     except ValueError as error:

@@ -165,7 +165,8 @@ class Product:
         if not promotion:
             self._promotion = promotion
         else:
-            self._promotion.append(promotion)
+            if promotion not in self._promotion:
+                self._promotion.append(promotion)
 
     def get_promotions(self, quantity):
         """
