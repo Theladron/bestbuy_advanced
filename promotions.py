@@ -42,6 +42,8 @@ class SecondHalfPrice(Promotion):
         :param quantity: amount of bought items as int
         :return: updated quantity as int
         """
+        if quantity < 2:
+            return quantity
         full_price_quantity = quantity / 2
         full_price_decimal = Decimal(f"{full_price_quantity}")
         full_price_quantity = int(full_price_decimal.quantize(Decimal("1"), rounding=ROUND_HALF_UP))

@@ -89,4 +89,4 @@ class Store:
                     shopping_list[index][0].quantity = refund_quantity
                 return (f"Error while making order: {error}")
 
-        return f"Total order price: {round(total_price, 2)}"
+        return f"Total order price: ${round(total_price, 2)}"

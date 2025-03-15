@@ -121,7 +121,7 @@ class Product:
         """
         if self._active:
             show_product = (f"{self.name}, Price: "
-                            f"{self.price}, Quantity: {self.quantity}, Promotion(s): ")
+                            f"${self.price}, Quantity: {self.quantity}, Promotion(s): ")
             if self.promotion:
                 for promotion in self.promotion:
                     show_product += f"{promotion.name} "
@@ -142,7 +142,7 @@ class Product:
         if not self.is_active():
             raise ValueError("Product Inactive")
         if self.quantity - quantity < 0:
-            raise ValueError("Quantity cannot be negative")
+            raise ValueError("Cannot buy more of the product than available")
         self.quantity -= quantity
         quantity = self.get_promotions(quantity)
         return self.price * quantity
@@ -178,14 +178,17 @@ class Product:
                       if isinstance(promotion, promotions.ThirdOneFree)), None)
         if promo:
             quantity = promo.apply_promotion(self.name, quantity)
+
         promo = next((promotion for promotion in self.promotion
                       if isinstance(promotion, promotions.PercentDiscount)), None)
         if promo:
             quantity = promo.apply_promotion(self.name, quantity)
+
         promo = next((promotion for promotion in self.promotion
                       if isinstance(promotion, promotions.SecondHalfPrice)), None)
         if promo:
             quantity = promo.apply_promotion(self.name, quantity)
+
         return quantity
 
 
@@ -206,7 +209,7 @@ class NonStockedProduct(Product):
         :return: name, price, quantity and promotions as str
         """
         show_product = (f"{self.name}, Price: "
-                        f"{self.price}, Quantity: Unlimited, Promotion(s): ")
+                        f"${self.price}, Quantity: Unlimited, Promotion(s): ")
         if self.promotion:
             for promotion in self.promotion:
                 show_product += f"{promotion.name} "
@@ -244,7 +247,7 @@ class LimitedProduct(Product):
         :return: name, price, quantity, maximum and promotion as str
         """
         if self._active:
-            show_product = (f"{self.name}, Price: {self.price},"
+            show_product = (f"{self.name}, Price: ${self.price},"
                             f" Quantity: {self._quantity}, Limited to {self.maximum} "
                             f"per order!, Promotion(s): ")
             if self.promotion:
@@ -269,7 +272,7 @@ class LimitedProduct(Product):
         if quantity > self.maximum:
             raise ValueError(f"Only {self.maximum} is allowed for this product!")
         if self.quantity - quantity < 0:
-            raise ValueError("Quantity cannot be negative")
+            raise ValueError("Cannot buy more of the product than available")
         self.quantity -= quantity
         quantity = self.get_promotions(quantity)
         return self._price * quantity
