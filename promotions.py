@@ -45,8 +45,12 @@ class SecondHalfPrice(Promotion):
         if quantity < 2:
             return quantity
         full_price_quantity = quantity / 2
+
+        # decimal library is necessary here to ensure half products are allways counted towards
+        # the fully priced products
         full_price_decimal = Decimal(f"{full_price_quantity}")
         full_price_quantity = int(full_price_decimal.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
         half_price_quantity = quantity - full_price_quantity
         return full_price_quantity + half_price_quantity * 0.5
 
