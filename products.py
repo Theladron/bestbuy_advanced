@@ -180,12 +180,12 @@ class Product:
             quantity = promo.apply_promotion(self.name, quantity)
 
         promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.PercentDiscount)), None)
+                      if isinstance(promotion, promotions.SecondHalfPrice)), None)
         if promo:
             quantity = promo.apply_promotion(self.name, quantity)
 
         promo = next((promotion for promotion in self.promotion
-                      if isinstance(promotion, promotions.SecondHalfPrice)), None)
+                      if isinstance(promotion, promotions.PercentDiscount)), None)
         if promo:
             quantity = promo.apply_promotion(self.name, quantity)
 
